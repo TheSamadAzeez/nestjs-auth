@@ -1,0 +1,76 @@
+### Variables
+@baseUrl = http://localhost:3000
+@accessToken = {{login.response.body.accessToken}}
+
+### ==========================================
+### App
+### ==========================================
+
+### Get Hello
+GET {{baseUrl}}/
+
+### ==========================================
+### Authentication
+### ==========================================
+
+### 1. Register a new user
+POST {{baseUrl}}/auth/register
+Content-Type: application/json
+
+{
+  "email": "test@example.com",
+  "password": "Password123!",
+  "name": "Test User"
+}
+
+### 2. Login
+# @name login
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "test@example.com",
+  "password": "Password123!"
+}
+
+### 3. Refresh Token
+# The HTTP client usually forwards the HttpOnly 'refresh_token' cookie automatically
+POST {{baseUrl}}/auth/refresh
+
+### 4. Logout
+POST {{baseUrl}}/auth/logout
+
+### 5. Logout All Devices (Requires Authentication)
+POST {{baseUrl}}/auth/logout-all
+Authorization: Bearer {{accessToken}}
+
+
+### ==========================================
+### Users
+### ==========================================
+
+### Get Current User (Me)
+GET {{baseUrl}}/users/me
+Authorization: Bearer {{accessToken}}
+
+### Update Current User (Me)
+PATCH {{baseUrl}}/users/me
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "name": "Updated Name"
+}
+
+### Get All Users (Admin Only)
+GET {{baseUrl}}/users/all
+Authorization: Bearer {{accessToken}}
+
+### Delete User (Admin Only)
+# Replace :id with an actual UUID or ID from your database
+DELETE {{baseUrl}}/users/some-user-id
+Authorization: Bearer {{accessToken}}
+
+### Get Public Profile
+# Replace :id with an actual UUID or ID
+GET {{baseUrl}}/users/some-user-id/profile
