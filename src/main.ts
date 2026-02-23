@@ -1,12 +1,20 @@
+import { ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
-import { AppModule } from './app.module';
-import helmet from 'helmet';
 import cookieParser from 'cookie-parser';
+import helmet from 'helmet';
+import { AppModule } from './app.module';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+  app.useGlobalPipes(
+    new ValidationPipe({
+      whitelist: true, // remove any properties that are not in the dto
+      forbidNonWhitelisted: true, // throw an error if a property is not in the dto
+      transform: true, // transform the request body to the dto type
+    }),
+  );
   app.enableCors({
-    origin: process.env.FRONTEND_URL, //TODO: use config service
+    origin: process.env.FRONTEND_URL,
     credentials: true, // allows cookies cross-origin
   });
 
