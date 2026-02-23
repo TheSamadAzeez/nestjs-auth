@@ -1,3 +1,3 @@
 //---- Table exports ----
-export { users } from './users';
+export { users, role } from './users';
 export { refreshTokens } from './refresh-tokens';
