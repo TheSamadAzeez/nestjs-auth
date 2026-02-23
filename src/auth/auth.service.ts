@@ -11,12 +11,8 @@ export class AuthService {
 
   async register(email: string, password: string, name: string) {
     const user = await this.usersService.createUser(email, password, name);
-    const tokens = await this.tokenService.issueTokens(
-      user.id,
-      user.email,
-      user.role,
-    );
-    return { user, tokens };
+    // await this.tokenService.issueTokens(user.id, user.email, user.role);
+    return { user: { id: user.id, email: user.email, role: user.role } };
   }
 
   async login(email: string, password: string) {

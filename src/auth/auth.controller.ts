@@ -24,7 +24,7 @@ const cookieOptions = {
   httpOnly: true, // JS cannot read this cookie — blocks XSS token theft
   secure: true, // HTTPS only
   sameSite: 'strict' as const, // blocks CSRF for most cases
-  path: '/auth/refresh', // cookie only sent to this path, not every request
+  path: '/auth', // cookie only sent to this path, not every request
   maxAge: 30 * 24 * 60 * 60 * 1000,
 };
 
@@ -97,11 +97,16 @@ export class AuthController {
   async logout(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
     const rawToken = req.cookies[REFRESH_COOKIE] as string;
 
-    if (rawToken) {
-      await this.authService.logout(rawToken);
+    if (!rawToken) {
+      throw new UnauthorizedException({
+        code: 'NO_REFRESH_TOKEN',
+        message: 'No refresh token provided',
+      });
     }
 
-    res.clearCookie(REFRESH_COOKIE, { path: '/auth/refresh' });
+    await this.authService.logout(rawToken);
+
+    res.clearCookie(REFRESH_COOKIE, { path: '/auth' });
     return {
       message: 'Logged out successfully',
     };
@@ -115,7 +120,7 @@ export class AuthController {
     @Res({ passthrough: true }) res: Response,
   ) {
     await this.tokenService.revokeAllForUser(user.id);
-    res.clearCookie(REFRESH_COOKIE, { path: '/auth/refresh' });
+    res.clearCookie(REFRESH_COOKIE, { path: '/auth' });
     return { message: 'All sessions terminated' };
   }
 }

@@ -50,14 +50,17 @@ export class TokenService {
       .digest('hex');
     const tokenFamily = family ?? crypto.randomUUID(); // if no family provided, create a new one
 
+    const refreshExpiresIn: string = this.config.get<string>(
+      'JWT_REFRESH_EXPIRES_IN',
+      '7d',
+    );
+    const days = parseInt(refreshExpiresIn, 10) || 7; // parse "7d" → 7, fallback to 7
+
     await this.db.insert(schema.refreshTokens).values({
       userId,
       tokenHash,
       familyId: tokenFamily,
-      expiresAt: new Date(
-        Date.now() +
-          this.config.get('JWT_REFRESH_EXPIRES_IN', '7d') * 24 * 60 * 60 * 1000,
-      ), // 7 days
+      expiresAt: new Date(Date.now() + days * 24 * 60 * 60 * 1000),
     });
 
     return rawToken; // send raw to client; store only the hash
