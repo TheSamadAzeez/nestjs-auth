@@ -27,7 +27,7 @@ export class TokenService {
       { id: userId, email, role },
       {
         secret: this.config.get('JWT_ACCESS_SECRET'),
-        expiresIn: this.config.get('JWT_EXPIRES'),
+        expiresIn: this.config.get('JWT_EXPIRES_IN'),
       },
     );
   }
@@ -54,7 +54,10 @@ export class TokenService {
       userId,
       tokenHash,
       familyId: tokenFamily,
-      expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days, TODO: use env variable,
+      expiresAt: new Date(
+        Date.now() +
+          this.config.get('JWT_REFRESH_EXPIRES_IN', '7d') * 24 * 60 * 60 * 1000,
+      ), // 7 days
     });
 
     return rawToken; // send raw to client; store only the hash
