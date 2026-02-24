@@ -1,10 +1,19 @@
-import { Controller, Delete, Get, Param, Patch } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Patch,
+  Post,
+} from '@nestjs/common';
 import { Roles } from 'src/common/decorators/roles.decorator';
 import { CurrentUser } from 'src/common/decorators/current-user.decorator';
 import type { JwtPayload } from 'src/common/types/jwt-payload.type';
 import { Role } from 'src/common/enums/role.enum';
 import { UsersService } from './users.service';
 import { Public } from 'src/common/decorators/public.decorator';
+import { EmailDto } from './dtos/email.dto';
 
 @Controller('users')
 export class UsersController {
@@ -20,16 +29,42 @@ export class UsersController {
     return console.log('user updated');
   }
 
+  @Post()
+  @Roles(Role.ADMIN)
+  async getUserByEmail(@Body() body: EmailDto) {
+    return await this.usersService.findUserByEmail(body.email);
+  }
+
   @Get('all')
   @Roles(Role.ADMIN)
-  getAllUsers() {
-    return this.usersService.findAllUsers();
+  async getAllUsers() {
+    return await this.usersService.findAllUsers();
+  }
+
+  @Get(':userId')
+  @Roles(Role.ADMIN)
+  async getUserById(@Param('userId') userId: string) {
+    return await this.usersService.findUserById(userId);
   }
 
   @Delete(':userId')
   @Roles(Role.ADMIN)
-  deleteUser(@Param('userId') userId: string) {
-    return this.usersService.deleteUser(userId);
+  async deleteUser(@Param('userId') userId: string) {
+    const user = await this.usersService.deleteUser(userId);
+    return {
+      user,
+      message: 'User deleted successfully',
+    };
+  }
+
+  @Post('/deactivate/:userId')
+  @Roles(Role.ADMIN)
+  async deactivateUser(@Param('userId') userId: string) {
+    const user = await this.usersService.deactivateUser(userId);
+    return {
+      user: { id: user.id, email: user.email, role: user.role },
+      message: 'User deactivated successfully',
+    };
   }
 
   @Get(':userId/profile')
