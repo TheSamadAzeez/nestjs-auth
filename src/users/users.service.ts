@@ -77,6 +77,16 @@ export class UsersService {
     return user;
   }
 
+  async deactivateUser(userId: string) {
+    const user = await this.findUserById(userId);
+
+    await this.db
+      .update(schema.users)
+      .set({ isActive: false }) //TODO: add soft delete and deactivated field
+      .where(eq(schema.users.id, userId));
+    return user;
+  }
+
   async validatePassword(password: string, hash: string) {
     const valid = await bcrypt.compare(password, hash);
     if (!valid) {
